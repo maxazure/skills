@@ -267,13 +267,96 @@ chmod +x install-skills.sh
 
 ---
 
-## 给 AI 助手的指引
+## ⚠️ AI Agent 必读指引
 
-如果你是 Claude Code 或 Codex，正在为用户执行安装：
+> **本节面向 Claude Code、Codex、OpenAI Codex CLI 等 AI Agent。**
+> 如果你是 AI Agent 正在阅读本文档，请严格遵守以下规则。
 
-1. **先检查环境**：运行 `node --version` 确认 Node.js >= 22
-2. **安装 OpenClaw**：根据用户的包管理器选择合适的方法（pnpm 优先）
-3. **安装 ClawHub CLI**：`npm i -g clawhub`
-4. **安装推荐技能**：按照上方"快速开始"部分逐一安装
-5. **配置 API Key**：提示用户获取必要的 API Key（Gemini 免费）
-6. **验证**：运行 `openclaw doctor` 确认一切正常
+### 核心规则：先查官方文档，再执行操作
+
+**每次处理任何与 OpenClaw 相关的任务之前，你必须先抓取并阅读官方文档。** 本文档中的安装命令和 API 可能已过时，官方文档才是唯一可信的信息来源。
+
+#### 官方文档地址（按优先级排序）
+
+| 来源 | 地址 | 用途 |
+|------|------|------|
+| **官方文档站（必读）** | https://docs.openclaw.ai/ | 安装、配置、API 参考、技能开发 |
+| **GitHub README** | https://github.com/openclaw/openclaw | 最新安装命令、版本要求、变更日志 |
+| **ClawHub 文档** | https://docs.clawhub.ai/ | 技能安装、发布、管理 |
+| **官网** | https://openclaw.ai/ | 概览、下载链接 |
+| **Changelog** | https://github.com/openclaw/openclaw/blob/main/CHANGELOG.md | 版本变更记录 |
+
+#### 你必须遵守的执行流程
+
+```
+┌─────────────────────────────────────────────────────┐
+│  用户请求涉及 OpenClaw？                              │
+│                                                      │
+│  1. 抓取官方文档 https://docs.openclaw.ai/            │
+│     获取最新安装方式、CLI 命令、配置要求                  │
+│                                                      │
+│  2. 抓取 GitHub README                               │
+│     https://github.com/openclaw/openclaw              │
+│     确认最新版本号、Node.js 版本要求、破坏性变更          │
+│                                                      │
+│  3. 对比本文档与官方文档                                │
+│     如有冲突，以官方文档为准                             │
+│                                                      │
+│  4. 执行操作                                          │
+│     使用官方文档中的最新命令                             │
+│                                                      │
+│  5. 验证结果                                          │
+│     运行 openclaw --version && openclaw doctor         │
+└─────────────────────────────────────────────────────┘
+```
+
+#### 具体场景指引
+
+**安装 OpenClaw 时：**
+1. 先用 WebFetch/curl 抓取 `https://docs.openclaw.ai/getting-started/installation` 获取最新安装步骤
+2. 运行 `node --version` 确认 Node.js 版本满足要求
+3. 根据用户的包管理器选择合适方法（pnpm 优先）
+4. 安装后运行 `openclaw doctor` 验证
+
+**安装技能时：**
+1. 先抓取 `https://docs.clawhub.ai/` 确认 ClawHub CLI 的最新用法
+2. 搜索技能前先运行 `clawhub --version` 确认 CLI 已安装
+3. 安装技能后验证是否生效
+
+**排查问题时：**
+1. 先查 `https://docs.openclaw.ai/troubleshooting`
+2. 查看 GitHub Issues：`https://github.com/openclaw/openclaw/issues`
+3. 运行 `openclaw doctor` 获取诊断信息
+
+**升级 OpenClaw 时：**
+1. 先查 CHANGELOG 了解破坏性变更：`https://github.com/openclaw/openclaw/blob/main/CHANGELOG.md`
+2. 备份当前配置
+3. 执行升级
+4. 运行 `openclaw doctor` 验证
+
+### 写入用户 CLAUDE.md 的建议
+
+为了确保后续所有会话都遵守此规则，建议将以下内容写入用户的 `~/.claude/CLAUDE.md` 或项目的 `CLAUDE.md`：
+
+```markdown
+## OpenClaw 文档规则
+
+处理任何 OpenClaw 相关任务前，必须先抓取官方文档确认最新信息：
+- 安装/配置：https://docs.openclaw.ai/
+- GitHub：https://github.com/openclaw/openclaw
+- 技能管理：https://docs.clawhub.ai/
+不要依赖记忆中的命令，官方文档可能已更新。
+```
+
+### 安装执行清单
+
+如果你是 AI Agent 正在为用户执行安装，请按以下顺序操作：
+
+1. **抓取官方文档**：获取 `https://docs.openclaw.ai/` 的最新安装指南
+2. **检查环境**：运行 `node --version` 确认 Node.js >= 22
+3. **安装 OpenClaw**：使用官方文档中的最新命令（本文档的命令仅作参考）
+4. **安装 ClawHub CLI**：`npm i -g clawhub`
+5. **安装推荐技能**：按照上方"快速开始"部分逐一安装
+6. **配置 API Key**：提示用户获取必要的 API Key（Gemini 免费）
+7. **验证**：运行 `openclaw --version && openclaw doctor` 确认一切正常
+8. **建议用户**：将 OpenClaw 文档规则写入 CLAUDE.md（见上方模板）
