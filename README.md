@@ -171,7 +171,7 @@ cd ~/.claude/skills/elevenlabs-tts
 
 #### Gemini Image Gen — 推荐，Google 免费 API
 
-使用 Google Gemini 图片生成能力，支持 Claude Code Skill 和 MCP 两种模式。
+使用 Google Gemini 图片生成能力，通过官方 `@google/genai` SDK 直接调用 Google API，支持 Claude Code Skill 和 MCP 两种模式。MIT 许可。
 
 - 仓库：https://github.com/guinacio/claude-image-gen
 - 费用：Google AI Studio 提供免费 API Key，额度充裕
@@ -180,18 +180,6 @@ cd ~/.claude/skills/elevenlabs-tts
 # 获取 Gemini API Key：https://aistudio.google.com/apikey
 # 通过 plugin marketplace 安装：
 /plugin marketplace add guinacio/claude-image-gen
-```
-
-#### Gemini Image Skill（备选实现）
-
-- 仓库：https://github.com/Ceeon/gemini-image-skill
-
-```bash
-git clone https://github.com/Ceeon/gemini-image-skill.git /tmp/gemini-image-skill
-cp -r /tmp/gemini-image-skill ~/.claude/skills/gemini-image
-cd ~/.claude/skills/gemini-image
-cp secrets.example.md secrets.md
-# 编辑 secrets.md，填入 Gemini API Key
 ```
 
 ---
@@ -228,7 +216,115 @@ npx skills add vercel-labs/skills --skill find-skills -g
 
 ---
 
-### 📚 更多技能资源
+## 🤖 Agent 工作流技能（OpenClaw 多 Agent 编排）
+
+以下技能是基于 OpenClaw 多 Agent 协作能力构建的自动化工作流，适合个人用户日常使用。每个技能包含完整的工作流定义、Agent 提示词和配置说明。
+
+### 🌅 全能晨间简报（Daily Briefing）
+
+**把用户每天最重要的信息压缩成一条可执行晨报。**
+
+- **目标用户**：独立开发者、创业者、高信息密度工作者
+- **核心价值**：读完 30 秒内知道今天最重要的事，不需要切 5 个 App
+- **触发方式**：每天早上 9:00 自动执行 / 手动触发
+- **数据源**：Google Calendar + Gmail + Todoist/Notion + 本地待办
+- **输出**：Telegram 推送 / Email / Markdown 文件
+
+| Agent | 职责 |
+|-------|------|
+| Calendar Reader | 读取今日会议、检测冲突、识别空档 |
+| Task Prioritizer | 艾森豪威尔矩阵智能排序待办 |
+| Signal Collector | 抓取星标邮件、重要未读、客户动态 |
+| Executive Summarizer | 压缩成 500 字以内的"今日作战板" |
+| Delivery Agent | 多渠道推送（Telegram / Email / Markdown） |
+
+| 评估维度 | 评分 |
+|----------|------|
+| 自动化价值 | ⭐⭐⭐⭐⭐ 10/10 |
+| 实现复杂度 | ⭐⭐⭐ 5/10 |
+| 可持续性 | ⭐⭐⭐⭐⭐ 10/10 |
+| 商业化潜力 | ⭐⭐⭐⭐ 8/10 |
+
+📁 详细文档：[`daily-briefing/`](daily-briefing/)
+
+---
+
+### 🎬 视频创意全自动漏斗（Video Idea Pipeline）
+
+**把模糊创意自动变成可执行内容 Brief。**
+
+- **目标用户**：YouTuber、B站UP主、自媒体创作者、内容团队、MCN 机构
+- **核心价值**：从"我想做这个方向"到"可以直接开写脚本"，时间从半天降到 10 分钟
+- **触发方式**：手动输入一句模糊想法
+- **数据源**：X/Twitter + Reddit + YouTube + Google Trends + Brave Search
+- **输出**：完整 Brief（Markdown / Notion / Telegram）
+
+| Agent | 职责 |
+|-------|------|
+| Idea Expander | 把模糊想法扩展成多个搜索方向和关键词 |
+| Trend Researcher | 多平台热点搜索、竞品内容分析 |
+| Audience Mapper | 目标人群画像、传播机会识别 |
+| Positioning Strategist | 差异化角度、标题方向、风险评估 |
+| Brief Writer | 输出完整可执行 Brief（含标题、大纲、Hook、CTA） |
+
+| 评估维度 | 评分 |
+|----------|------|
+| 自动化价值 | ⭐⭐⭐⭐⭐ 9/10 |
+| 实现复杂度 | ⭐⭐⭐ 6/10 |
+| 可持续性 | ⭐⭐⭐⭐⭐ 9/10 |
+| 商业化潜力 | ⭐⭐⭐⭐⭐ 10/10 |
+
+📁 详细文档：[`video-idea-pipeline/`](video-idea-pipeline/)
+
+---
+
+### 🤝 进化版个人 CRM（Self-Evolving CRM）
+
+**自动维护联系人关系和待跟进事项，解决"关系维护断层"。**
+
+- **目标用户**：销售、咨询顾问、自由职业者、创业者、猎头、小型 Agency
+- **核心价值**：不再漏跟进、关系不断层、量化健康评分、会前自动简报
+- **触发方式**：每天 8:00 定时 / 会议前 30 分钟 / 手动触发起草
+- **数据源**：Gmail + Google Calendar + 会议纪要 + Apollo.io 充实
+- **输出**：Telegram 每日摘要 / 会前简报 / 跟进消息草稿
+- **格式**：遵循 [OpenClaw 官方 SKILL.md 格式](https://docs.openclaw.ai/tools/skills)
+- **参考**：Clay, Dex, Folk, PingCRM, Dynamics 365, Realvolve 等产品最佳实践
+
+| Agent | 职责 |
+|-------|------|
+| Data Collector | 从邮件、日历、会议纪要采集原始互动数据 |
+| Enrichment | 邮件签名解析 + 公司网站抓取 + Apollo API 补全档案 |
+| Relationship Summarizer | 关系摘要 + 0-100 健康评分（含衰减公式） |
+| Action Extractor | 承诺检测、待办提取、闭环追踪 |
+| Meeting Prep | 会前 30 分钟推送参会者简报 |
+| Draft Writer | 基于上下文和用户语气起草跟进消息 |
+| Notifier | 每日/每周推送 + 交互命令（/done /snooze /draft） |
+
+| 评估维度 | 评分 |
+|----------|------|
+| 自动化价值 | ⭐⭐⭐⭐⭐ 9/10 |
+| 实现复杂度 | ⭐⭐⭐⭐ 7/10 |
+| 可持续性 | ⭐⭐⭐⭐⭐ 10/10 |
+| 商业化潜力 | ⭐⭐⭐⭐⭐ 9/10 |
+
+📁 详细文档：[`self-evolving-crm/`](self-evolving-crm/)
+
+---
+
+### 📊 Agent 工作流优先级总览
+
+| 技能 | 推荐级别 | 理由 |
+|------|----------|------|
+| 🌅 全能晨间简报 | ⭐⭐⭐ 极高 | 最稳、最高频、最容易 MVP、可作为入口工作流 |
+| 🎬 视频创意漏斗 | ⭐⭐⭐ 极高 | 演示效果强、创作者刚需、商业化直接 |
+| 🤝 进化版 CRM | ⭐⭐⭐ 极高 | 粘性强、价值高、适合 Agent + Memory 模式 |
+| 🔒 代码安全理事会 | ⭐⭐ 高 | 专业价值高，但工程复杂（计划中） |
+| 📱 全平台社媒追踪 | ⭐⭐ 高 | 市场好，但平台接入复杂（计划中） |
+| 🧠 专家决策委员会 | ⭐ 中高 | 很强但依赖多数据源（计划中） |
+
+---
+
+## 📚 更多技能资源
 
 | 资源 | 地址 | 说明 |
 |------|------|------|
@@ -261,14 +357,9 @@ echo ">> 安装 frontend-design..."
 npx skills add vercel-labs/agent-skills --skill frontend-design -g
 
 # 2. 图像生成（需要 Gemini API Key）
-echo ">> 安装 Gemini Image Skill..."
-if [ -d ~/.claude/skills/gemini-image ]; then
-  echo "   已存在，跳过"
-else
-  git clone https://github.com/Ceeon/gemini-image-skill.git /tmp/gemini-image-skill
-  cp -r /tmp/gemini-image-skill ~/.claude/skills/gemini-image
-  echo "   请编辑 ~/.claude/skills/gemini-image/secrets.md 填入 Gemini API Key"
-fi
+echo ">> 安装 Gemini Image Gen（guinacio/claude-image-gen）..."
+echo "   请手动安装：/plugin marketplace add guinacio/claude-image-gen"
+echo "   或参见仓库 README：https://github.com/guinacio/claude-image-gen"
 
 # 3. TTS（完全免费，本地运行）
 echo ">> 安装 Kokoro TTS..."

@@ -14,15 +14,9 @@ echo ">> 安装 frontend-design..."
 npx skills add vercel-labs/agent-skills --skill frontend-design -g
 
 # 2. 图像生成（需要 Gemini API Key）
-echo ">> 安装 Gemini Image Skill..."
-if [ -d ~/.claude/skills/gemini-image ]; then
-  echo "   已存在，跳过"
-else
-  git clone https://github.com/Ceeon/gemini-image-skill.git /tmp/gemini-image-skill
-  cp -r /tmp/gemini-image-skill ~/.claude/skills/gemini-image
-  rm -rf /tmp/gemini-image-skill
-  echo "   请编辑 ~/.claude/skills/gemini-image/secrets.md 填入 Gemini API Key"
-fi
+echo ">> 安装 Gemini Image Gen（guinacio/claude-image-gen）..."
+echo "   请手动安装：/plugin marketplace add guinacio/claude-image-gen"
+echo "   或参见仓库 README：https://github.com/guinacio/claude-image-gen"
 
 # 3. TTS（完全免费，本地运行）
 echo ">> 安装 Kokoro TTS..."
