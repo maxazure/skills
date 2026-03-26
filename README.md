@@ -91,6 +91,26 @@ clawhub list                     # 查看已安装技能
 
 ---
 
+## 🛠️ 开发效率
+
+### Vercel 官方技能集 — 最高安装量
+
+- 仓库：https://github.com/vercel-labs/agent-skills
+- 官网：https://skills.sh
+
+```bash
+# React/Next.js 最佳实践（185K+ 安装）
+npx skills add vercel-labs/agent-skills --skill react-best-practices -g
+
+# 前端设计技能
+npx skills add vercel-labs/agent-skills --skill frontend-design -g
+
+# 技能发现器 — 让 Claude 自动搜索合适的技能
+npx skills add vercel-labs/skills --skill find-skills -g
+```
+
+---
+
 ## 🤖 Agent 工作流技能（OpenClaw 多 Agent 编排）
 
 以下技能是基于 OpenClaw 多 Agent 协作能力构建的自动化工作流，适合个人用户日常使用。每个技能包含完整的工作流定义、Agent 提示词和配置说明。
