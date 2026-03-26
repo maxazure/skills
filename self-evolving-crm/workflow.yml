@@ -1,0 +1,99 @@
+---
+workflow:
+  name: self-evolving-crm
+  version: "0.2.0"
+  goal: "自动维护联系人关系和待跟进事项"
+  description: >
+    从 Gmail、日历、会议纪要中自动提取联系人和互动记录，
+    维护关系摘要和健康评分，推送跟进提醒和会前简报，起草跟进消息。
+
+  trigger:
+    type: schedule
+    schedule: "0 8 * * *"
+    timezone: "Pacific/Auckland"
+    manual: true
+
+  agents:
+    - name: data_collector
+      prompt: "./references/agent-data-collector.md"
+      description: "采集 Gmail、日历、会议纪要数据"
+      timeout: "60s"
+      parallel_group: collection
+
+    - name: enrichment
+      prompt: "./references/agent-enrichment.md"
+      description: "联系人充实：签名解析、网站抓取、Apollo API"
+      timeout: "90s"
+      depends_on: [data_collector]
+
+    - name: relationship_agent
+      prompt: "./references/agent-relationship.md"
+      description: "关系摘要与健康评分"
+      timeout: "60s"
+      depends_on: [data_collector, enrichment]
+
+    - name: action_extractor
+      prompt: "./references/agent-action-extractor.md"
+      description: "待办提取与闭环追踪"
+      timeout: "60s"
+      depends_on: [data_collector]
+
+    - name: notifier
+      prompt: "./references/agent-notifier.md"
+      description: "每日摘要推送"
+      timeout: "30s"
+      depends_on: [relationship_agent, action_extractor]
+
+    - name: meeting_prep
+      prompt: "./references/agent-meeting-prep.md"
+      description: "会前简报生成"
+      timeout: "60s"
+      parallel_group: collection
+
+    - name: draft_writer
+      prompt: "./references/agent-draft-writer.md"
+      description: "跟进消息起草"
+      timeout: "60s"
+
+  memory:
+    enabled: true
+    store: "openclaw.memory.self-evolving-crm"
+    state_items:
+      - key: last_scan_time
+        type: datetime
+        description: "上次扫描时间"
+      - key: contacts_db
+        type: object
+        description: "联系人数据库"
+        retention: "permanent"
+      - key: skip_patterns
+        type: object
+        description: "学习到的跳过规则"
+        retention: "permanent"
+      - key: writing_style
+        type: object
+        description: "用户写作风格档案"
+        retention: "permanent"
+      - key: user_preferences
+        type: object
+        description: "用户偏好设置"
+        retention: "permanent"
+        default:
+          apollo_priority_threshold: 2
+          telegram_enabled: true
+
+  outputs:
+    - name: telegram
+      type: message
+      provider: telegram
+      enabled: true
+      config:
+        bot_token: "$secrets.TELEGRAM_BOT_TOKEN"
+        chat_id: "$secrets.TELEGRAM_CHAT_ID"
+
+  error_handling:
+    on_api_failure:
+      strategy: partial_delivery
+    retry:
+      max_attempts: 2
+      delay: "10s"

@@ -85,24 +85,18 @@ workflow:
         method: "pytrends or web scraping"
         note: "无需 API key"
 
-    - name: user_knowledge_base
-      type: memory
-      description: "用户的历史 Brief、频道定位、受众画像等持久化数据"
-      config:
-        source: "openclaw memory"
-
   # Agent 定义
   agents:
     - name: idea_expander
-      prompt: "prompts/idea-expander.md"
+      prompt: "./prompts/idea-expander.md"
       role: "创意扩展器"
       description: "把模糊想法扩展成多个搜索方向和关键词"
-      input:
-        - trigger.raw_idea
-        - trigger.target_platform
-        - trigger.language
-        - trigger.content_pillars  # 优先使用用户本次输入的 content_pillars
-        - memory.content_pillars   # 回退到记忆中的 content_pillars（trigger 优先，memory 补充）
+      inputs:
+        - $trigger.raw_idea
+        - $trigger.target_platform
+        - $trigger.language
+        - $trigger.content_pillars  # 优先使用用户本次输入的 content_pillars
+        - $memory.content_pillars   # 回退到记忆中的 content_pillars（trigger 优先，memory 补充）
       output:
         search_queries:
           type: array
@@ -115,22 +109,22 @@ workflow:
         angle_suggestions:
           type: array
           description: "潜在的内容角度建议"
-      timeout: 30s
+      timeout: "30s"
 
     - name: trend_researcher
-      prompt: "prompts/trend-researcher.md"
+      prompt: "./prompts/trend-researcher.md"
       role: "趋势研究员"
       description: "从多平台搜索热点、竞品内容、讨论趋势"
       depends_on:
         - idea_expander
-      input:
-        - idea_expander.search_queries
-        - idea_expander.keywords
-        - inputs.brave_search
-        - inputs.youtube_data
-        - inputs.reddit
-        - inputs.twitter_x
-        - inputs.google_trends
+      inputs:
+        - $agents.idea_expander.output.search_queries
+        - $agents.idea_expander.output.keywords
+        - $inputs.brave_search
+        - $inputs.youtube_data
+        - $inputs.reddit
+        - $inputs.twitter_x
+        - $inputs.google_trends
       output:
         trend_data:
           type: object
@@ -144,19 +138,19 @@ workflow:
         timing_assessment:
           type: object
           description: "时效性评估：是否是好时机"
-      timeout: 120s
+      timeout: "120s"
 
     - name: audience_mapper
-      prompt: "prompts/audience-mapper.md"
+      prompt: "./prompts/audience-mapper.md"
       role: "受众定位器"
       description: "识别目标人群画像和传播机会"
       depends_on:
         - trend_researcher
-      input:
-        - trend_researcher.trend_data
-        - trend_researcher.discussion_themes
-        - trend_researcher.competing_content
-        - memory.audience_profile
+      inputs:
+        - $agents.trend_researcher.output.trend_data
+        - $agents.trend_researcher.output.discussion_themes
+        - $agents.trend_researcher.output.competing_content
+        - $memory.audience_profile
       output:
         target_audience:
           type: object
@@ -170,23 +164,23 @@ workflow:
         virality_potential:
           type: object
           description: "传播潜力评估"
-      timeout: 60s
+      timeout: "60s"
 
     - name: positioning_strategist
-      prompt: "prompts/positioning-strategist.md"
+      prompt: "./prompts/positioning-strategist.md"
       role: "定位策略师"
       description: "确定内容差异化角度、标题方向、风险评估"
       depends_on:
         - audience_mapper
         - trend_researcher
-      input:
-        - audience_mapper.target_audience
-        - audience_mapper.pain_points
-        - audience_mapper.resonance_angles
-        - trend_researcher.competing_content
-        - trend_researcher.timing_assessment
-        - memory.past_briefs
-        - memory.performance_history
+      inputs:
+        - $agents.audience_mapper.output.target_audience
+        - $agents.audience_mapper.output.pain_points
+        - $agents.audience_mapper.output.resonance_angles
+        - $agents.trend_researcher.output.competing_content
+        - $agents.trend_researcher.output.timing_assessment
+        - $memory.past_briefs
+        - $memory.performance_history
       output:
         recommended_angle:
           type: string
@@ -209,10 +203,10 @@ workflow:
               max: 10
             reasoning: string
             market_saturation: string
-      timeout: 60s
+      timeout: "60s"
 
     - name: brief_writer
-      prompt: "prompts/brief-writer.md"
+      prompt: "./prompts/brief-writer.md"
       role: "Brief 撰写器"
       description: "汇总所有信息，输出完整可执行的内容 Brief"
       depends_on:
@@ -220,21 +214,21 @@ workflow:
         - trend_researcher
         - audience_mapper
         - positioning_strategist
-      input:
-        - trigger.raw_idea
-        - trigger.target_platform
-        - trigger.language
-        - idea_expander.angle_suggestions
-        - trend_researcher.trend_data
-        - trend_researcher.competing_content
-        - trend_researcher.timing_assessment   # 时效性数据，用于填充 why_now
-        - audience_mapper.target_audience
-        - audience_mapper.pain_points
-        - audience_mapper.virality_potential    # 传播潜力评估
-        - positioning_strategist.recommended_angle
-        - positioning_strategist.title_candidates
-        - positioning_strategist.risk_assessment
-        - positioning_strategist.competition_intensity
+      inputs:
+        - $trigger.raw_idea
+        - $trigger.target_platform
+        - $trigger.language
+        - $agents.idea_expander.output.angle_suggestions
+        - $agents.trend_researcher.output.trend_data
+        - $agents.trend_researcher.output.competing_content
+        - $agents.trend_researcher.output.timing_assessment   # 时效性数据，用于填充 why_now
+        - $agents.audience_mapper.output.target_audience
+        - $agents.audience_mapper.output.pain_points
+        - $agents.audience_mapper.output.virality_potential    # 传播潜力评估
+        - $agents.positioning_strategist.output.recommended_angle
+        - $agents.positioning_strategist.output.title_candidates
+        - $agents.positioning_strategist.output.risk_assessment
+        - $agents.positioning_strategist.output.competition_intensity
       output:
         video_brief:
           type: object
@@ -251,47 +245,45 @@ workflow:
             - outline
             - call_to_action
             - metadata
-      timeout: 90s
+      timeout: "90s"
 
   # 持久化记忆
   memory:
     enabled: true
-    backend: "openclaw-memory"
+    store: "openclaw.memory.video-idea-pipeline"
     state_items:
-      past_briefs:
+      - key: past_briefs
         type: array
-        description: "历史生成的 Brief（用于避免重复选题、学习偏好）"
+        description: "历史生成的 Brief"
         retention: "90 days"
         max_items: 100
-
-      audience_profile:
+      - key: audience_profile
         type: object
-        description: "用户的目标受众画像（随使用不断精化）"
+        description: "用户的目标受众画像"
         retention: "permanent"
         updatable: true
-
-      content_pillars:
+      - key: content_pillars
         type: array
         description: "用户的内容支柱/频道定位"
         retention: "permanent"
         updatable: true
-        examples:
-          - ["AI 工具评测", "编程教程", "效率提升"]
-
-      performance_history:
+      - key: performance_history
         type: array
-        description: "过去 Brief 对应视频的表现数据（用户手动反馈或自动追踪）"
+        description: "过去 Brief 对应视频的表现数据"
         retention: "permanent"
         max_items: 200
-        schema:
-          brief_id: string
-          published_date: date
-          views: number
-          likes: number
-          comments: number
-          ctr: number
-          retention_rate: number
-          user_rating: number
+
+  # 错误处理
+  error_handling:
+    on_api_failure:
+      strategy: partial_delivery
+      description: "如果某个 API 调用失败，继续用其他数据源的结果输出"
+    on_agent_timeout:
+      strategy: skip_with_notice
+      description: "Agent 超时时跳过该步骤，注明数据暂缺"
+    retry:
+      max_attempts: 2
+      delay: "10s"
 
   # 输出渠道
   outputs:
@@ -340,47 +332,39 @@ workflow:
     checks:
       - name: has_3_titles
         description: "必须包含 3 个标题候选"
-        rule: "len(brief.titles) == 3"
         severity: error
 
       - name: has_hook
         description: "必须包含明确的 hook（用户为什么要点开）"
-        rule: "brief.hooks.primary is not empty"
         severity: error
 
       - name: has_outline
         description: "必须包含内容大纲（至少 3 个 section）"
-        rule: "len(brief.outline) >= 3"
         severity: error
 
       - name: has_audience
         description: "必须包含目标受众描述"
-        rule: "brief.target_audience.primary is not empty"
         severity: error
 
       - name: competitive_analysis_included
         description: "必须包含至少 2 个竞品分析"
-        rule: "len(brief.competitors) >= 2"
         severity: warning
 
       - name: actionable_brief
         description: "Brief 必须可执行——大纲中每个 section 都有 key_points"
-        rule: "all(section.key_points is not empty for section in brief.outline)"
         severity: error
 
       - name: has_why_now
         description: "必须说明为什么现在做这个选题"
-        rule: "brief.why_now.trend_signal is not empty"
         severity: warning
 
       - name: has_cta
         description: "必须包含行动号召"
-        rule: "brief.call_to_action.primary is not empty"
         severity: warning
 
   # 运行配置
   settings:
-    max_total_runtime: 300s
+    max_total_runtime: "300s"
     retry_on_failure: true
     max_retries: 2
     log_level: info

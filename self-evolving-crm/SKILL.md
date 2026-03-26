@@ -130,6 +130,8 @@ Step 5: 用户确认后，保存为已发送互动记录
   - 建议切换到自动模式
   - 自动添加/跳过，每周推送一次"本周自动决策回顾"让用户修正
   - 用户修正会更新模式权重
+
+> 学习模式详情见 [references/agent-data-collector.md](references/agent-data-collector.md) 的"增量扫描流程"部分。
 ```
 
 ## 数据结构

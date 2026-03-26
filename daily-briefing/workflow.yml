@@ -27,18 +27,31 @@ workflow:
       scope: "https://www.googleapis.com/auth/gmail.readonly"
       description: "读取过去 24 小时的星标邮件和重要未读"
       required: true
+      config:
+        api_key_env: GMAIL_CREDENTIALS
+
+    - name: gmail_send
+      type: api
+      provider: google
+      scope: "https://www.googleapis.com/auth/gmail.send"
+      description: "发送邮件通知"
+      required: false
 
     - name: todoist
       type: api
       provider: todoist
       description: "读取今日到期和 overdue 的任务"
       required: false  # 与 notion / local_todos 三选一
+      config:
+        api_key_env: TODOIST_API_TOKEN
 
     - name: notion
       type: api
       provider: notion
       description: "读取 Notion 数据库中的待办事项"
       required: false  # 与 todoist / local_todos 三选一
+      config:
+        api_key_env: NOTION_API_KEY
 
     - name: local_todos
       type: file
@@ -133,7 +146,7 @@ workflow:
       type: message
       provider: telegram
       enabled: true
-      format: markdown
+      format: MarkdownV2
       config:
         bot_token: "$secrets.TELEGRAM_BOT_TOKEN"
         chat_id: "$secrets.TELEGRAM_CHAT_ID"
@@ -192,4 +205,4 @@ workflow:
       description: "Agent 超时时跳过该板块，在输出中注明"
     retry:
       max_attempts: 2
-      delay: 10s
+      delay: "10s"

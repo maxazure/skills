@@ -1,0 +1,46 @@
+# Self-Evolving CRM 配置
+# 复制此文件为 config.yaml 并填写实际值
+
+required_env:
+  GMAIL_OAUTH_CREDENTIALS: "OAuth2 JSON 文件路径或内容"
+  GOOGLE_CALENDAR_CREDENTIALS: "OAuth2 JSON 文件路径或内容"
+  TELEGRAM_BOT_TOKEN: "Telegram Bot Token（从 @BotFather 获取）"
+  TELEGRAM_CHAT_ID: "你的 Telegram Chat ID"
+
+optional_env:
+  APOLLO_API_KEY: "Apollo.io API Key（免费 10000 次/月）"
+  BRAVE_SEARCH_API_KEY: "Brave Search API Key（免费 2000 次/月）"
+  NOTION_API_KEY: "Notion API Key"
+
+behavior:
+  # Apollo API 充实策略
+  apollo_enrichment:
+    enabled: true
+    priority: "high"  # only_active / all
+    monthly_limit: 10000
+
+  # 联系人合并
+  auto_merge:
+    confidence_threshold: 0.9  # 高于此置信度自动合并
+    suggest_merge_threshold: 0.7  # 高于此置信度建议用户确认
+
+  # Telegram 通知
+  telegram:
+    digest_time: "08:00"  # 每日摘要推送时间（NZST）
+    meeting_prep_minutes: 30  # 会议前多少分钟推送简报
+    quiet_hours:
+      start: "22:00"
+      end: "07:00"
+
+  # 写作风格学习
+  writing_style:
+    enabled: true
+    min_samples: 10  # 最少需要多少封邮件才开始学习
+
+  # 健康评分阈值
+  health_score:
+    warning_threshold: 50
+    critical_threshold: 20
+    decay_rate_new: 0.15  # <3个月关系的月衰减率
+    decay_rate_mid: 0.10   # 3-12个月
+    decay_rate_old: 0.05   # >12个月

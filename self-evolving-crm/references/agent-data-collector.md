@@ -32,6 +32,8 @@
 
 ### 过滤规则
 
+**时区注意**：Gmail API 返回的时间戳为 UTC。所有日期计算使用 NZST（Pacific/Auckland，时区 +12/+13）。转换公式：`nzst_time = utc_time + 12h`（夏令时期间 +13h）。
+
 以下发件人/收件人自动跳过，不生成交互记录：
 
 ```yaml
@@ -107,7 +109,7 @@ skip_calendar_events:
 
 ### 监控机制
 
-- 监控路径：`./meeting-notes/`
+- 监控路径：`~/.openclaw/workspace/self-evolving-crm/meeting-notes/`
 - 支持格式：`.md`、`.txt`
 - 检测方式：比对文件修改时间（mtime）与 `last_scan_time`
 - 新文件和已修改文件均触发处理
@@ -213,7 +215,7 @@ interaction_record:
 {
   "email_ids": ["msg_abc123", "msg_def456"],
   "note_files": [
-    {"path": "./meeting-notes/2026-03-19-kickoff.md", "mtime": 1711234567}
+    {"path": "~/.openclaw/workspace/self-evolving-crm/meeting-notes/2026-03-19-kickoff.md", "mtime": 1711234567}
   ]
 }
 ```

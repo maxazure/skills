@@ -11,6 +11,8 @@
 - `daily_brief` — 来自 Agent 4（Executive Summarizer）的结构化晨报数据
 - `delivery_channels` — 用户配置的推送渠道列表
 
+**Memory 访问**：使用 `$memory.last_run_time` 访问上次推送时间，使用 `$memory.user_preferences` 访问用户偏好设置。
+
 ## 输出
 
 按照每个启用的渠道，输出格式化后的消息并执行推送。
@@ -135,6 +137,8 @@
 ---
 *生成时间：YYYY-MM-DD HH:MM*
 ```
+
+如果 `signal_collector.noise_stats` 可用，在消息底部添加一行：`🔇 过滤了 {newsletter_count} 封订阅、{promo_count} 封推广邮件`
 
 **Markdown 格式注意事项**：
 - 文件保存路径：`~/daily-briefs/YYYY-MM-DD.md`

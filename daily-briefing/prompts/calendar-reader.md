@@ -10,6 +10,8 @@
 - **时间范围**：今天全天 + 明天上午（00:00 - 12:00）
 - **过滤条件**：排除已取消的事件、全天事件（除非是重要截止日）
 
+**时区注意**：所有时间均使用工作流配置的时区（Pacific/Auckland，NZST/NZDT）。"今天"指当日 00:00 至 23:59 NZST。
+
 ## 输出格式
 
 请严格按照以下 YAML 结构输出：
@@ -17,6 +19,8 @@
 ```yaml
 calendar_summary:
   date: "YYYY-MM-DD"
+  status: "ok"  # ok | error | partial
+  error_message: ""  # 当 status 为 error 时填写
   total_meetings: <数字>
   total_meeting_hours: <小时数，保留一位小数>
 
@@ -63,6 +67,7 @@ calendar_summary:
    - `short_break`：15-30 分钟的空档，适合休息或处理简单事务
    - `buffer`：30-90 分钟的空档，可用于回复邮件、处理待办
 3. 优先高亮 `deep_work` 级别的空档
+4. 对于 15 分钟以下的空档，不单独列出（过短无实际意义）。
 
 ### 明天预览
 1. 只看明天上午（00:00 - 12:00）的会议

@@ -15,6 +15,8 @@
   - GitHub 通知（Issue、PR 提及）
   - 社交媒体提醒
 
+**时区注意**：所有时间均使用工作流配置的时区（Pacific/Auckland，NZST/NZDT）。"今天"指当日 00:00 至 23:59 NZST。
+
 ## 输出格式
 
 请严格按照以下 YAML 结构输出：
@@ -22,6 +24,8 @@
 ```yaml
 signals:
   date: "YYYY-MM-DD"
+  status: "ok"  # ok | error | partial
+  error_message: ""  # 当 status 为 error 时填写
   total_scanned: <扫描的邮件/通知总数>
   total_surfaced: <最终输出的重要信号数>
 

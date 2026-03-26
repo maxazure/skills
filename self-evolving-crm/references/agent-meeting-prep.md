@@ -26,7 +26,9 @@ openclaw cron add --name "crm-meeting-prep" --cron "0 * * * *" \
 
 ### 触发逻辑
 
-1. 每整点执行一次
+**时区**：所有时间使用配置的时区（Pacific/Auckland，NZST）。会议时间判断需考虑时区转换。
+
+1. 每整点执行一次（每小时检查一次）
 2. 读取 Google Calendar，筛选 **当前时间 ~ 当前时间 + 60 分钟** 内开始的会议
 3. 对符合条件的会议生成简报
 4. 在会议开始前 **30 分钟** 推送到 Telegram

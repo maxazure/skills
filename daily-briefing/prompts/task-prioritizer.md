@@ -14,6 +14,8 @@
   - 本地 Markdown 文件（`~/todos/*.md`）
 - **时间范围**：今天到期 + 所有 overdue（逾期）的任务
 
+**时区注意**：所有时间均使用工作流配置的时区（Pacific/Auckland，NZST/NZDT）。"今天"指当日 00:00 至 23:59 NZST。
+
 ## 输出格式
 
 请严格按照以下 YAML 结构输出：

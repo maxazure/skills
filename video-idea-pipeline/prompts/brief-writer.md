@@ -11,11 +11,15 @@
 ## 输入
 
 - `raw_idea`：用户的原始想法
+- `target_platform`：目标平台（来自 trigger）
+- `language`：内容语言（来自 trigger）
 - `angle_suggestions`：来自 Agent 1 的角度建议
 - `trend_data`：来自 Agent 2 的趋势数据
 - `competing_content`：来自 Agent 2 的竞品分析
+- `timing_assessment`：来自 Agent 2 的时效性评估
 - `target_audience`：来自 Agent 3 的受众画像
 - `pain_points`：来自 Agent 3 的受众痛点
+- `virality_potential`：来自 Agent 3 的传播潜力评估
 - `recommended_angle`：来自 Agent 4 的推荐角度
 - `title_candidates`：来自 Agent 4 的 3 个标题候选
 - `risk_assessment`：来自 Agent 4 的风险评估

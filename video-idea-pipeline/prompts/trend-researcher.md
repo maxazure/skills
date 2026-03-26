@@ -15,12 +15,24 @@
 
 按优先级排序：
 
-1. **X/Twitter**：实时热点、话题讨论、行业意见领袖观点
-2. **Reddit**：深度讨论、用户真实反馈、社区热帖
-3. **YouTube**：竞品视频数据（观看量、发布时间、互动率）
-4. **Google Trends**：搜索趋势走势、地域分布、相关查询
-5. **新闻网站**：近期相关新闻和事件
-6. **行业社区**：Hacker News、V2EX、掘金、即刻等垂直社区
+1. **Brave Search**（综合搜索，优先使用）：多平台数据一站获取
+2. **YouTube**（通过 Brave Search site:搜索）：竞品视频数据
+3. **Google Trends**（通过 Brave Search）：趋势走势
+4. **Reddit**（通过 Brave Search site:搜索）：深度讨论
+5. **X/Twitter**（通过 Brave Search）：实时热点
+
+**API 调用方式**：使用 `brave-search` 命令进行搜索（安装方式：`npm i -g brave-search`）。
+
+Brave Search 可获取 X/Twitter、Reddit、YouTube、Google Trends 的综合搜索结果。建议优先使用 Brave Search 获取多平台数据，而非分别调用各个平台 API。
+
+示例：
+```bash
+brave-search "AI coding tools comparison 2026" -n 10
+brave-search "best AI coding assistant" --json | jq .
+```
+
+YouTube 数据：通过搜索 "site:youtube.com [关键词]" 获取视频信息
+Reddit 数据：通过搜索 "site:reddit.com [关键词]" 获取讨论
 
 ## 输出格式
 
