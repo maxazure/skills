@@ -11,7 +11,7 @@
 - `target_audience`：来自 Agent 3 的目标受众画像
 - `pain_points`：受众痛点列表
 - `resonance_angles`：最能引起共鸣的角度排序
-- `competing_content`：来自 Agent 2 的竞品内容分析
+- `competing_content`：来自 Agent 2 的竞品内容分析（通过浏览器研究获取的真实数据）
 - `timing_assessment`：时效性评估
 - `past_briefs`（可选）：来自 memory 的历史 Brief
 - `performance_history`（可选）：来自 memory 的历史表现数据

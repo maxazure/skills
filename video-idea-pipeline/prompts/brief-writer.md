@@ -14,7 +14,7 @@
 - `target_platform`：目标平台（来自 trigger）
 - `language`：内容语言（来自 trigger）
 - `angle_suggestions`：来自 Agent 1 的角度建议
-- `trend_data`：来自 Agent 2 的趋势数据
+- `trend_data`：来自 Agent 2 的趋势数据（通过浏览器研究获取的真实数据）
 - `competing_content`：来自 Agent 2 的竞品分析
 - `timing_assessment`：来自 Agent 2 的时效性评估
 - `target_audience`：来自 Agent 3 的受众画像
@@ -25,9 +25,11 @@
 - `risk_assessment`：来自 Agent 4 的风险评估
 - `competition_intensity`：来自 Agent 4 的竞争强度评分
 
-## 输出格式
+## 输出方式
 
-输出一份完整的 `video_brief` YAML，结构如下：
+输出一份完整的 Markdown 文件，保存到 `~/video-briefs/{date}-{slug}.md`。
+
+文件中包含完整的 `video_brief` YAML 结构：
 
 ```yaml
 video_brief:
@@ -282,8 +284,9 @@ video_brief:
 
 ### 特殊注意事项
 
-- **不要编造数据**：如果某些数据不可用（比如具体搜索量），标注为"数据暂缺"而非编造一个数字
+- **不要编造数据**：如果某些数据不可用（比如某平台浏览器访问失败导致数据暂缺），标注为"数据暂缺"而非编造一个数字
 - **语言一致性**：Brief 的语言应与用户指定的 language 一致
 - **平台适配**：不同平台的 Brief 在大纲结构和时长上应有所不同（如抖音视频不需要 10 分钟的大纲）
 - **保持中立**：Brief 应该客观呈现数据和分析，让创作者自己做最终决策，但可以明确标注推荐
 - **完整性优先**：宁可 Brief 长一些但信息完整，也不要为了简洁而遗漏关键信息
+- **输出为本地文件**：Brief 直接保存为 Markdown 文件到 `~/video-briefs/` 目录，无需推送到 Notion 或 Telegram

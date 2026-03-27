@@ -1,9 +1,11 @@
 workflow:
   name: daily-briefing
-  version: "1.0.0"
+  version: "2.0.0"
   goal: "把用户每天最重要的信息压缩成一条可执行晨报"
   description: >
-    每天早上自动聚合日历、待办、邮件等信息源，
+    零 API 密钥、零配置的本地晨间简报系统。
+    使用 icalBuddy 读取日历、本地 Markdown 管理待办、
+    RSS 订阅聚合新闻信号、curl 获取天气，
     经过 AI 智能筛选和优先级排序后，
     生成一份 30 秒内可读完的晨间简报。
 
@@ -14,81 +16,67 @@ workflow:
     manual: true  # 支持手动触发：openclaw run daily-briefing
 
   inputs:
-    - name: google_calendar
-      type: api
-      provider: google
-      scope: "https://www.googleapis.com/auth/calendar.readonly"
-      description: "读取今日和明天上午的日历事件"
+    - name: icalbuddy
+      type: local_tool
+      command: "icalBuddy"
+      install: "brew install ical-buddy"
+      description: "通过 icalBuddy 读取 macOS 原生日历中的今日和明天上午事件"
       required: true
-
-    - name: gmail
-      type: api
-      provider: google
-      scope: "https://www.googleapis.com/auth/gmail.readonly"
-      description: "读取过去 24 小时的星标邮件和重要未读"
-      required: true
-      config:
-        api_key_env: GMAIL_CREDENTIALS
-
-    - name: gmail_send
-      type: api
-      provider: google
-      scope: "https://www.googleapis.com/auth/gmail.send"
-      description: "发送邮件通知"
-      required: false
-
-    - name: todoist
-      type: api
-      provider: todoist
-      description: "读取今日到期和 overdue 的任务"
-      required: false  # 与 notion / local_todos 三选一
-      config:
-        api_key_env: TODOIST_API_TOKEN
-
-    - name: notion
-      type: api
-      provider: notion
-      description: "读取 Notion 数据库中的待办事项"
-      required: false  # 与 todoist / local_todos 三选一
-      config:
-        api_key_env: NOTION_API_KEY
 
     - name: local_todos
       type: file
       path: "~/todos/*.md"
       description: "读取本地 Markdown 格式的待办事项"
-      required: false  # 与 todoist / notion 三选一
+      required: true
+
+    - name: rss_feeds
+      type: rss
+      config_path: "~/daily-briefing-config/feeds.yml"
+      description: "通过 RSS 订阅聚合新闻和行业信号"
+      required: false
+
+    - name: weather
+      type: http
+      url: "https://wttr.in/Auckland?format=%C+%t+%w+%h"
+      description: "通过 wttr.in 获取当地天气（免费、无需认证）"
+      required: false
+
+    - name: browser_use
+      type: mcp
+      provider: browser-use
+      description: "（可选）通过 Browser Use MCP 浏览器自动化读取 Gmail 等网页数据"
+      required: false
 
   agents:
     - name: calendar-reader
       prompt: "./prompts/calendar-reader.md"
-      description: "读取今日会议、识别冲突、找出空档时间"
+      description: "通过 icalBuddy 读取今日会议、识别冲突、找出空档时间"
       inputs:
-        - google_calendar
+        - icalbuddy
       timeout: "30s"
       parallel_group: data_collection  # 与其他数据收集 Agent 并行
 
     - name: task-prioritizer
       prompt: "./prompts/task-prioritizer.md"
-      description: "读取待办事项并按优先级智能排序"
+      description: "读取本地 Markdown 待办事项并按优先级智能排序"
       inputs:
-        - todoist
-        - notion
         - local_todos
       timeout: "30s"
       parallel_group: data_collection
 
     - name: signal-collector
       prompt: "./prompts/signal-collector.md"
-      description: "收集重要通知、未读重点、客户动态"
+      description: "通过 RSS 和可选浏览器自动化收集重要信号"
       inputs:
-        - gmail
-      timeout: "30s"
+        - rss_feeds
+        - browser_use
+        - weather
+      timeout: "60s"
       parallel_group: data_collection
 
     - name: executive-summarizer
       prompt: "./prompts/executive-summarizer.md"
-      description: "将所有信息压缩成一条 30 秒可读的今日作战板"
+      description: "将所有信息压缩成一条 30 秒可读的今日作战板（含天气）"
       inputs:
         - "$agents.calendar-reader.output"
         - "$agents.task-prioritizer.output"
@@ -101,7 +89,7 @@ workflow:
 
     - name: delivery-agent
       prompt: "./prompts/delivery-agent.md"
-      description: "按用户配置的渠道推送晨报"
+      description: "生成 Markdown 晨报文件并保存到本地"
       inputs:
         - "$agents.executive-summarizer.output"
       depends_on:
@@ -114,24 +102,17 @@ workflow:
     state_items:
       - key: last_run_time
         type: datetime
-        description: "上次成功执行的时间，用于避免重复推送"
-
-      - key: processed_email_ids
-        type: list
-        description: "已处理的邮件 ID 列表，避免重复提醒"
-        max_items: 500
-        ttl: "7d"  # 7 天后自动清理
+        description: "上次成功执行的时间，用于避免重复生成"
 
       - key: user_preferences
         type: object
         description: >
-          用户偏好设置：优先级权重、关注的发件人、
-          忽略的日历类别、首选推送渠道等
+          用户偏好设置：优先级权重、关注的 RSS 源、
+          忽略的日历类别等
         default:
           max_priorities: 3
-          email_lookback_hours: 24
           ignored_calendar_categories: ["holidays", "birthdays"]
-          important_senders: []
+          rss_keywords: []
 
       - key: priority_history
         type: list
@@ -142,24 +123,6 @@ workflow:
         ttl: "90d"
 
   outputs:
-    - name: telegram
-      type: message
-      provider: telegram
-      enabled: true
-      format: MarkdownV2
-      config:
-        bot_token: "$secrets.TELEGRAM_BOT_TOKEN"
-        chat_id: "$secrets.TELEGRAM_CHAT_ID"
-
-    - name: email
-      type: email
-      provider: gmail
-      enabled: false  # 默认关闭，用户可手动开启
-      format: html
-      config:
-        to: "$user.email"
-        subject: "☀️ 晨间简报 — {{date}}"
-
     - name: markdown
       type: file
       enabled: true
@@ -194,10 +157,10 @@ workflow:
         severity: error
 
   error_handling:
-    on_api_failure:
+    on_tool_failure:
       strategy: partial_delivery
       description: >
-        如果某个 API 调用失败（如 Google Calendar 超时），
+        如果某个本地工具调用失败（如 icalBuddy 未安装），
         不阻塞整个流程，而是在晨报中标注"日历数据暂时不可用"，
         继续输出其他板块的内容。
     on_agent_timeout:

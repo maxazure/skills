@@ -1,11 +1,12 @@
 workflow:
   name: video-idea-pipeline
-  version: "0.1.0"
-  goal: "把模糊创意自动变成可执行内容 Brief"
+  version: "0.2.0"
+  goal: "把模糊创意自动变成可执行内容 Brief（零 API 密钥）"
   description: >
     接收用户的一句模糊内容想法，通过 5 个 AI Agent 协作，
     自动完成趋势研究、受众分析、竞品调研、角度定位，
     最终输出一份完整的、可直接用于脚本创作的视频内容 Brief。
+    所有数据研究通过 Browser Use MCP 浏览器自动化完成，无需任何 API 密钥。
 
   # 触发方式
   trigger:
@@ -47,43 +48,27 @@ workflow:
 
   # 数据输入源
   inputs:
-    - name: brave_search
-      type: api
-      description: "通用网页搜索和新闻检索"
+    - name: browser_use
+      type: mcp
+      provider: browser-use
+      description: >
+        通过 Browser Use MCP 控制真实 Chromium 浏览器，直接访问各大平台获取数据。
+        可导航至 Google、YouTube、Reddit、X/Twitter、Google Trends 等任意网站，
+        提取页面内容和结构化数据。无需任何 API 密钥。
       config:
-        api_key_env: BRAVE_SEARCH_API_KEY
-        rate_limit: "1 req/sec"
-        quota: "2000 req/month"
-
-    - name: youtube_data
-      type: api
-      description: "搜索竞品视频、获取播放量和互动数据"
-      config:
-        api_key_env: YOUTUBE_API_KEY
-        rate_limit: "10000 units/day"
-
-    - name: reddit
-      type: api
-      description: "搜索相关 subreddit 的讨论和热帖"
-      config:
-        client_id_env: REDDIT_CLIENT_ID
-        client_secret_env: REDDIT_CLIENT_SECRET
-        rate_limit: "100 req/min"
-
-    - name: twitter_x
-      type: api
-      description: "搜索热点话题、讨论和趋势"
-      config:
-        bearer_token_env: TWITTER_BEARER_TOKEN
-        fallback: "scraper"
-        note: "官方 API 较贵，可使用 scraper 替代"
-
-    - name: google_trends
-      type: scraper
-      description: "搜索趋势分析，判断话题热度走势"
-      config:
-        method: "pytrends or web scraping"
-        note: "无需 API key"
+        install_command: "claude mcp add browser-use -- uvx --from 'browser-use[cli]' browser-use --mcp"
+        capabilities:
+          - "导航到任意 URL"
+          - "读取页面内容并提取结构化数据"
+          - "在任意搜索引擎上搜索"
+          - "浏览 YouTube、Reddit、X/Twitter、Google Trends"
+          - "填写表单、点击元素、滚动页面"
+        platforms:
+          google_search: "google.com"
+          youtube: "youtube.com/results?search_query=..."
+          reddit: "reddit.com/search?q=... 或 reddit.com/r/SUBREDDIT/.rss"
+          twitter_x: "x.com/search?q=..."
+          google_trends: "trends.google.com/trends/explore?q=..."
 
   # Agent 定义
   agents:
@@ -114,17 +99,13 @@ workflow:
     - name: trend_researcher
       prompt: "./prompts/trend-researcher.md"
       role: "趋势研究员"
-      description: "从多平台搜索热点、竞品内容、讨论趋势"
+      description: "通过 Browser Use MCP 浏览多平台，搜索热点、竞品内容、讨论趋势"
       depends_on:
         - idea_expander
       inputs:
         - $agents.idea_expander.output.search_queries
         - $agents.idea_expander.output.keywords
-        - $inputs.brave_search
-        - $inputs.youtube_data
-        - $inputs.reddit
-        - $inputs.twitter_x
-        - $inputs.google_trends
+        - $inputs.browser_use
       output:
         trend_data:
           type: object
@@ -138,7 +119,8 @@ workflow:
         timing_assessment:
           type: object
           description: "时效性评估：是否是好时机"
-      timeout: "120s"
+      timeout: "180s"
+      note: "浏览器自动化比 API 调用更慢，但数据更真实、更全面"
 
     - name: audience_mapper
       prompt: "./prompts/audience-mapper.md"
@@ -275,9 +257,9 @@ workflow:
 
   # 错误处理
   error_handling:
-    on_api_failure:
+    on_browser_failure:
       strategy: partial_delivery
-      description: "如果某个 API 调用失败，继续用其他数据源的结果输出"
+      description: "如果某个平台的浏览器访问失败（如反爬、超时），继续用其他平台的结果输出"
     on_agent_timeout:
       strategy: skip_with_notice
       description: "Agent 超时时跳过该步骤，注明数据暂缺"
@@ -293,38 +275,6 @@ workflow:
       description: "生成 Markdown 格式的 Brief 文件"
       path: "~/video-briefs/{date}-{slug}.md"
       enabled: true
-
-    - name: notion_page
-      type: notion
-      description: "将 Brief 写入 Notion 数据库"
-      config:
-        api_key_env: NOTION_API_KEY
-        database_id_env: NOTION_BRIEFS_DB_ID
-      enabled: false
-
-    - name: telegram_message
-      type: telegram
-      description: "将 Brief 摘要推送到 Telegram"
-      config:
-        bot_token_env: TELEGRAM_BOT_TOKEN
-        chat_id_env: TELEGRAM_CHAT_ID
-      template: |
-        📹 新 Brief 已生成！
-
-        💡 原始想法：{raw_idea}
-        🎯 精炼角度：{refined_angle}
-        👥 目标受众：{target_audience.primary}
-
-        📌 推荐标题：
-        1. {titles[0]}
-        2. {titles[1]}
-        3. {titles[2]}
-
-        ⏱ 时效性：{why_now.timeliness}/10
-        🔥 竞争强度：{metadata.competition_intensity}/10
-
-        完整 Brief 已保存至：{markdown_file.path}
-      enabled: false
 
   # 质量评估
   evaluation:
@@ -364,8 +314,8 @@ workflow:
 
   # 运行配置
   settings:
-    max_total_runtime: "300s"
+    max_total_runtime: "600s"  # 浏览器自动化需要更多时间
     retry_on_failure: true
     max_retries: 2
     log_level: info
-    parallel_research: true  # Agent 2 的多平台搜索可并行
+    parallel_research: true  # Agent 2 的多平台浏览可并行

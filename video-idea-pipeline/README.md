@@ -1,14 +1,34 @@
 # Video Idea Pipeline（视频创意全自动漏斗）
 
-> 把模糊创意自动变成可执行内容 Brief
+> 零 API 密钥 — 把模糊创意自动变成可执行内容 Brief
 
 ## 概述
 
 Video Idea Pipeline 是一个 OpenClaw 自动化技能，能将一句模糊的内容想法（如"我想做一个关于 AI 编程的视频"）自动转化为一份**完整、可执行的视频内容 Brief**。
 
-整个流程由 5 个 AI Agent 协作完成，自动搜索热点趋势、分析竞品内容、锁定目标受众、确定差异化角度，最终输出一份拿到就能开写脚本的 Brief 文档。
+整个流程由 5 个 AI Agent 协作完成，通过 **Browser Use MCP** 浏览器自动化技术直接访问各大平台获取真实数据——自动搜索热点趋势、分析竞品内容、锁定目标受众、确定差异化角度，最终输出一份拿到就能开写脚本的 Brief 文档。
 
-**核心承诺**：从"我想做这个方向"到"可以直接开写脚本"，时间从半天降到 10 分钟以内。
+**核心承诺**：从"我想做这个方向"到"可以直接开写脚本"，时间从半天降到 10 分钟以内。**零 API 密钥，零成本。**
+
+---
+
+## 零 API 密钥方案
+
+传统方案需要申请 5+ 个 API 密钥（Brave Search、YouTube Data API、Reddit API、Twitter/X API...），月成本 $100+。
+
+本技能通过 **Browser Use MCP** 实现完全免费的数据采集：
+
+| 传统 API 方案 | 本技能（Browser Use） |
+|--------------|---------------------|
+| Brave Search API（$0-99/月） | Browser Use 浏览 Google/DuckDuckGo |
+| YouTube Data API（有配额限制） | Browser Use 浏览 YouTube 搜索页面 |
+| Reddit API（需申请 OAuth） | Browser Use 浏览 Reddit + RSS feeds |
+| Twitter/X API（$100/月） | Browser Use 浏览 X.com 搜索 |
+| Google Trends（pytrends 不稳定） | Browser Use 浏览 trends.google.com |
+| Notion API（输出渠道） | 本地 Markdown 文件 |
+| Telegram Bot API（输出渠道） | 本地 Markdown 文件 |
+
+**Browser Use** 是一个开源 AI 浏览器自动化框架（84K+ GitHub stars），可控制真实 Chromium 浏览器。它能导航到任何网页、读取内容、提取结构化数据，就像人类手动浏览一样——但完全自动化。
 
 ---
 
@@ -26,11 +46,11 @@ Video Idea Pipeline 是一个 OpenClaw 自动化技能，能将一句模糊的�
 
 | 传统方式 | 使用 Video Idea Pipeline |
 |----------|------------------------|
-| 手动刷 X/Reddit/YouTube 找灵感（2-3 小时） | 自动多平台数据采集（2 分钟） |
+| 手动刷 X/Reddit/YouTube 找灵感（2-3 小时） | 自动浏览多平台数据采集（5-10 分钟） |
 | 凭感觉判断选题好不好（主观） | 数据驱动的趋势分析和竞品评估（客观） |
 | 反复修改选题方向（半天-一天） | 一次性输出 3 个差异化标题方向（5 分钟） |
 | Brief 格式不统一，遗漏关键信息 | 标准化 Brief 模板，字段完整 |
-| 选题会开一小时，产出 3 个选题 | 10 分钟产出 1 个完整可执行 Brief |
+| 需要申请多个 API 密钥和付费订阅 | 零 API 密钥，零成本 |
 
 ---
 
@@ -50,9 +70,13 @@ Video Idea Pipeline 是一个 OpenClaw 自动化技能，能将一句模糊的�
         │
         ▼
 ┌─────────────────┐
-│  Agent 2         │
-│  Trend Researcher│  从多平台搜索热点、竞品内容、讨论趋势
-│  （趋势研究员）    │  输出：趋势数据 + 竞品分析 + 讨论主题 + 时效性评估
+│  Agent 2         │  通过 Browser Use MCP 浏览：
+│  Trend Researcher│  - Google 搜索 → 综合搜索结果
+│  （趋势研究员）    │  - YouTube → 竞品视频和数据
+│                  │  - Reddit → 社区讨论和热帖
+│                  │  - X/Twitter → 实时热点话题
+│                  │  - Google Trends → 趋势走势
+│                  │  输出：趋势数据 + 竞品分析 + 讨论主题 + 时效性评估
 └───────┬─────────┘
         │
         ▼
@@ -74,12 +98,34 @@ Video Idea Pipeline 是一个 OpenClaw 自动化技能，能将一句模糊的�
 ┌─────────────────┐
 │  Agent 5         │
 │  Brief Writer    │  输出完整可执行的内容 Brief
-│  （Brief 撰写器） │  输出：完整 video_brief YAML
+│  （Brief 撰写器） │  输出：完整 video_brief YAML → Markdown 文件
 └───────┬─────────┘
         │
         ▼
-  完整 Brief 文档
+  ~/video-briefs/{date}-{slug}.md
 ```
+
+---
+
+## 配置说明
+
+### 安装 Browser Use MCP
+
+只需一条命令：
+
+```bash
+claude mcp add browser-use -- uvx --from 'browser-use[cli]' browser-use --mcp
+```
+
+**前置条件**：
+- Python 3.11+（用于 uvx）
+- Chromium 浏览器（Browser Use 会自动下载）
+
+**无需任何 API 密钥或环境变量配置。**
+
+### 验证安装
+
+安装完成后，在 Claude Code 中运行 `/mcp` 查看 browser-use 是否已连接。
 
 ---
 
@@ -88,14 +134,14 @@ Video Idea Pipeline 是一个 OpenClaw 自动化技能，能将一句模糊的�
 MVP 版本的核心流程：
 
 1. **输入**：用户提供一句模糊想法（例如："我想做一个关于用 AI 写代码的视频"）
-2. **自动搜索**：系统自动搜索 X/Twitter、Reddit、YouTube、Google Trends 等平台
-3. **输出**：一页完整的内容 Brief（Markdown 或 YAML 格式）
+2. **自动浏览**：系统通过 Browser Use MCP 自动浏览 Google、YouTube、Reddit、X/Twitter、Google Trends 等平台
+3. **输出**：一页完整的内容 Brief（Markdown 格式，保存到 `~/video-briefs/` 目录）
 
 ### 最小可用版本要求
 
 - 支持中文和英文输入
 - 默认目标平台为 YouTube（可切换为 B站、小红书等）
-- 搜索范围：近 7-30 天的数据
+- 搜索范围：近 7-30 天的数据（通过浏览器直接获取，数据始终最新）
 - 输出格式：Markdown 文件（包含完整 YAML 结构）
 
 ---
@@ -192,72 +238,37 @@ video_brief:
 
 ---
 
-## 配置说明
-
-### 必需的 API / Token
-
-| API | 用途 | 获取方式 | 费用 |
-|-----|------|---------|------|
-| **Brave Search API** | 通用网页搜索、新闻检索 | https://brave.com/search/api/ | 免费额度 2000次/月 |
-| **YouTube Data API v3** | 搜索竞品视频、获取数据 | Google Cloud Console | 免费额度 10,000 单位/天 |
-| **Reddit API** | 搜索相关讨论和热门帖子 | https://www.reddit.com/prefs/apps | 免费（100 QPS） |
-| **Twitter/X API** | 搜索热点话题和讨论 | https://developer.x.com/ | Basic $100/月 或使用 scraper |
-| **Google Trends** | 搜索趋势分析 | 无需 API（通过 pytrends 或 scraping） | 免费 |
-
-### 可选的 API
-
-| API | 用途 | 说明 |
-|-----|------|------|
-| Notion API | 将 Brief 写入 Notion | 需要 Integration Token |
-| Telegram Bot API | 推送 Brief 到 Telegram | 需要 Bot Token |
-| Google Sheets API | 将 Brief 追加到表格 | 用于团队协作 |
-
-### 环境变量配置
-
-```bash
-# 必需
-export BRAVE_SEARCH_API_KEY="your-key"
-export YOUTUBE_API_KEY="your-key"
-export REDDIT_CLIENT_ID="your-id"
-export REDDIT_CLIENT_SECRET="your-secret"
-
-# X/Twitter（二选一）
-export TWITTER_BEARER_TOKEN="your-token"     # 官方 API
-# 或使用 scraper 方案，无需 token
-
-# 可选
-export NOTION_API_KEY="your-key"
-export TELEGRAM_BOT_TOKEN="your-token"
-```
-
----
-
 ## 难点与风险
 
 ### 技术风险
 
-1. **平台 API 限制**
-   - X/Twitter API Basic 版 $100/月，成本较高
-   - 替代方案：使用 Nitter 或其他开源 scraper，但稳定性较差
-   - YouTube API 每日配额有限，批量使用时需注意限流
+1. **浏览器自动化速度**
+   - Browser Use 操控真实浏览器，比 API 调用更慢（每个平台约 30-60 秒）
+   - 总体研究时间约 5-10 分钟（API 方案约 2 分钟）
+   - 优势：数据始终最新、最真实，零成本
 
-2. **热点数据噪音大**
+2. **平台反爬机制**
+   - 部分平台（如 X/Twitter）可能有反爬策略
+   - 解决方案：Browser Use 使用真实浏览器行为，不易被检测；如某平台失败，继续用其他平台数据
+   - Reddit RSS feeds 作为备用数据源，稳定性极高
+
+3. **热点数据噪音大**
    - 搜索结果中大量低质量内容，需要有效的过滤和排序策略
    - 不同平台的 engagement 指标不可直接对比（YouTube 观看量 vs X 转发量）
 
-3. **多语言/多平台适配**
+4. **多语言/多平台适配**
    - 中文内容生态（B站、小红书、微博）与英文生态（YouTube、Reddit、X）差异巨大
    - 需要针对不同平台调整搜索策略和数据解读方式
 
 ### 内容风险
 
-4. **用户定位模糊导致 Brief 发散**
+5. **用户定位模糊导致 Brief 发散**
    - 如果用户没有明确的频道定位/内容方向，Brief 可能过于泛化
    - 解决方案：首次使用时引导用户填写 content_pillars（内容支柱）
 
-5. **数据时效性**
+6. **数据时效性**
    - 热点窗口期短，Brief 生成后需要快速执行
-   - 建议在 Brief 中标注时效性评分，提示用户优先级
+   - 优势：Browser Use 直接浏览真实网页，数据始终是最新的（比缓存型 API 更及时）
 
 ---
 
@@ -279,10 +290,10 @@ export TELEGRAM_BOT_TOKEN="your-token"
 | 维度 | 评分 | 说明 |
 |------|------|------|
 | **自动化价值** | 9/10 | 完整流水线，从输入到输出全自动，大幅节省选题时间 |
-| **数据依赖度** | 7/10 | 依赖多个平台 API，但核心逻辑不依赖单一数据源 |
-| **实现复杂度** | 6/10 | 5 个 Agent 的编排逻辑清晰，难点在数据采集和去噪 |
-| **可持续性** | 9/10 | 内容创作是持续需求，选题永远是核心痛点 |
+| **数据依赖度** | 9/10 | 通过 Browser Use 直接浏览网页，不依赖任何付费 API |
+| **实现复杂度** | 5/10 | 5 个 Agent 的编排逻辑清晰，Browser Use MCP 简化了数据采集 |
+| **可持续性** | 10/10 | 浏览器自动化不受 API 定价变化影响，长期成本为零 |
 | **商业化潜力** | 10/10 | 可按次收费、按月订阅，直接为创作者节省时间和提升质量 |
-| **OpenClaw 适配度** | 10/10 | 天然适合 Agent 编排，可接入多平台消息推送和定时触发 |
+| **OpenClaw 适配度** | 10/10 | 天然适合 Agent 编排，零配置门槛吸引更多用户 |
 
-**综合适配评分：10/10** — 演示价值最强，商业化路径最清晰的技能之一。
+**综合适配评分：10/10** — 零 API 密钥的设计大幅降低了使用门槛，商业化路径最清晰的技能之一。

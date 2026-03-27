@@ -8,9 +8,9 @@
 
 ## 输入
 
-- `calendar_summary` — 来自 Agent 1（Calendar Reader）的日历数据
-- `task_summary` — 来自 Agent 2（Task Prioritizer）的任务数据
-- `signals` — 来自 Agent 3（Signal Collector）的信号数据
+- `calendar_summary` — 来自 Agent 1（Calendar Reader）的日历数据（via icalBuddy）
+- `task_summary` — 来自 Agent 2（Task Prioritizer）的任务数据（via 本地 Markdown）
+- `signals` — 来自 Agent 3（Signal Collector）的信号数据（via RSS + 天气）
 
 ## 输出格式
 
@@ -19,6 +19,7 @@
 ```yaml
 daily_brief:
   date: "YYYY-MM-DD"
+  weather: "天气概况（如：多云 +18°C 微风 湿度72%）"
   today_in_one_sentence: "用一句话概括今天最重要的事（不超过 40 字）"
 
   top_priorities:
@@ -50,6 +51,11 @@ daily_brief:
 ```
 
 ## 压缩规则
+
+### 天气（weather）
+- 从 Signal Collector 的 `signals.weather` 字段直接提取
+- 格式化为一行简洁描述，如："多云 +18°C 微风 湿度72%"
+- 如果天气数据不可用，填写"天气数据暂时不可用"
 
 ### 今日一句话（today_in_one_sentence）
 - 不超过 **40 个字**
@@ -97,7 +103,7 @@ daily_brief:
 同一件事可能出现在多个 Agent 的输出中。你必须做以下去重：
 
 1. **日历事件 + 待办任务**：如果待办任务是为某个会议做准备，合并为一条，放在 `top_priorities` 中
-2. **邮件信号 + 待办任务**：如果某封邮件对应的待办已经在任务列表中，只在 `top_priorities` 列出，不在 `urgent_followups` 重复
+2. **RSS 信号 + 待办任务**：如果某条新闻对应的行动已经在任务列表中，只在 `top_priorities` 列出，不在 `urgent_followups` 重复
 3. **冲突警告 + 风险预警**：日历冲突只放在 `meetings.conflict_alerts` 中，不在 `risk_alerts` 重复（除非冲突影响了重要任务的完成）
 
 ## 质量检查清单
@@ -111,12 +117,14 @@ daily_brief:
 5. `today_in_one_sentence` 准确概括了全天最关键的信息
 6. 所有时间使用 24 小时制
 7. `suggested_focus` 包含具体的时间段建议
+8. `weather` 字段已填写
 
 ## 异常处理
 
 - 如果某个 Agent 返回了 `status: error`，在对应板块注明"数据暂时不可用"，不要编造数据
 - 如果所有 Agent 都返回空数据（没有会议、没有任务、没有信号），输出一条友好消息：
   ```yaml
+  weather: "（从 Signal Collector 获取）"
   today_in_one_sentence: "今天日程清空，是做长期规划或深度学习的好日子。"
   suggested_focus: "没有紧急事项，建议把时间花在重要但不紧急的 Q2 事项上。"
   ```

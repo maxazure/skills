@@ -115,28 +115,29 @@ npx skills add vercel-labs/skills --skill find-skills -g
 
 以下技能是基于 OpenClaw 多 Agent 协作能力构建的自动化工作流，适合个人用户日常使用。每个技能包含完整的工作流定义、Agent 提示词和配置说明。
 
-### 🌅 全能晨间简报（Daily Briefing）
+### 🌅 全能晨间简报（Daily Briefing）— 零 API 版
 
-**把用户每天最重要的信息压缩成一条可执行晨报。**
+**把用户每天最重要的信息压缩成一条可执行晨报。零 API 密钥，开箱即用。**
 
 - **目标用户**：独立开发者、创业者、高信息密度工作者
 - **核心价值**：读完 30 秒内知道今天最重要的事，不需要切 5 个 App
 - **触发方式**：每天早上 9:00 自动执行 / 手动触发
-- **数据源**：Google Calendar + Gmail + Todoist/Notion + 本地待办
-- **输出**：Telegram 推送 / Email / Markdown 文件
+- **数据源**：icalBuddy（macOS 原生日历）+ 本地 Markdown 待办 + RSS 新闻 + wttr.in 天气
+- **输出**：本地 Markdown 文件（`~/daily-briefs/YYYY-MM-DD.md`）
+- **可选增强**：Browser Use MCP 浏览器自动化（浏览 Gmail 等网页）
 
-| Agent | 职责 |
-|-------|------|
-| Calendar Reader | 读取今日会议、检测冲突、识别空档 |
-| Task Prioritizer | 艾森豪威尔矩阵智能排序待办 |
-| Signal Collector | 抓取星标邮件、重要未读、客户动态 |
-| Executive Summarizer | 压缩成 500 字以内的"今日作战板" |
-| Delivery Agent | 多渠道推送（Telegram / Email / Markdown） |
+| Agent | 职责 | 数据来源 |
+|-------|------|---------|
+| Calendar Reader | 读取今日会议、检测冲突、识别空档 | icalBuddy（macOS 原生） |
+| Task Prioritizer | 艾森豪威尔矩阵智能排序待办 | 本地 `~/todos/*.md` |
+| Signal Collector | 聚合新闻信号、天气信息 | RSS feeds + wttr.in |
+| Executive Summarizer | 压缩成 500 字以内的"今日作战板" | 上游 3 个 Agent 输出 |
+| Delivery Agent | 生成本地 Markdown 简报 | 本地文件写入 |
 
 | 评估维度 | 评分 |
 |----------|------|
 | 自动化价值 | ⭐⭐⭐⭐⭐ 10/10 |
-| 实现复杂度 | ⭐⭐⭐ 5/10 |
+| 实现复杂度 | ⭐⭐ 3/10（零 API 配置） |
 | 可持续性 | ⭐⭐⭐⭐⭐ 10/10 |
 | 商业化潜力 | ⭐⭐⭐⭐ 8/10 |
 
@@ -144,28 +145,28 @@ npx skills add vercel-labs/skills --skill find-skills -g
 
 ---
 
-### 🎬 视频创意全自动漏斗（Video Idea Pipeline）
+### 🎬 视频创意全自动漏斗（Video Idea Pipeline）— 零 API 版
 
-**把模糊创意自动变成可执行内容 Brief。**
+**把模糊创意自动变成可执行内容 Brief。通过 Browser Use 浏览器自动化完成全部研究，零 API 密钥。**
 
 - **目标用户**：YouTuber、B站UP主、自媒体创作者、内容团队、MCN 机构
 - **核心价值**：从"我想做这个方向"到"可以直接开写脚本"，时间从半天降到 10 分钟
 - **触发方式**：手动输入一句模糊想法
-- **数据源**：X/Twitter + Reddit + YouTube + Google Trends + Brave Search
-- **输出**：完整 Brief（Markdown / Notion / Telegram）
+- **数据源**：Browser Use MCP 浏览器自动化（Google、YouTube、Reddit、X/Twitter、Google Trends）
+- **输出**：本地 Markdown Brief（`~/video-briefs/{date}-{slug}.md`）
 
-| Agent | 职责 |
-|-------|------|
-| Idea Expander | 把模糊想法扩展成多个搜索方向和关键词 |
-| Trend Researcher | 多平台热点搜索、竞品内容分析 |
-| Audience Mapper | 目标人群画像、传播机会识别 |
-| Positioning Strategist | 差异化角度、标题方向、风险评估 |
-| Brief Writer | 输出完整可执行 Brief（含标题、大纲、Hook、CTA） |
+| Agent | 职责 | 数据来源 |
+|-------|------|---------|
+| Idea Expander | 把模糊想法扩展成多个搜索方向和关键词 | 用户输入 + 记忆 |
+| Trend Researcher | 多平台热点搜索、竞品内容分析 | Browser Use 浏览各平台 |
+| Audience Mapper | 目标人群画像、传播机会识别 | 上游研究数据 |
+| Positioning Strategist | 差异化角度、标题方向、风险评估 | 上游分析数据 + 记忆 |
+| Brief Writer | 输出完整可执行 Brief（含标题、大纲、Hook、CTA） | 全部上游输出 |
 
 | 评估维度 | 评分 |
 |----------|------|
 | 自动化价值 | ⭐⭐⭐⭐⭐ 9/10 |
-| 实现复杂度 | ⭐⭐⭐ 6/10 |
+| 实现复杂度 | ⭐⭐⭐ 5/10（仅需 Browser Use MCP） |
 | 可持续性 | ⭐⭐⭐⭐⭐ 9/10 |
 | 商业化潜力 | ⭐⭐⭐⭐⭐ 10/10 |
 
